@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Дроби Ернура</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+:root{
+  --bg:#EDF5FA; --surface:#FFFFFF; --ink:#0C2740; --muted:#4D6A86; --line:#C6DAE8;
+  --primary:#0B6E99; --on-primary:#FFFFFF; --sky:#2AA9D6; --gold:#F5BE0B; --on-gold:#2B2000; --gold-deep:#A87C00;
+  --hero-bg:#0A5C85; --hero-ink:#FFFFFF;
+  --display:'Unbounded','Trebuchet MS',system-ui,sans-serif;
+  --body:'Nunito',system-ui,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08182A; --surface:#10283F; --ink:#E8F2FA; --muted:#9BB5CB; --line:#27465F;
+    --primary:#3DB8E3; --on-primary:#04182A; --sky:#4CC2EC; --gold:#F7C531; --gold-deep:#C99A10;
+    --hero-bg:#0D3552; --hero-ink:#F2F8FC; color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:640px;margin:0 auto}
+h1,h2{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+.hero{background:var(--hero-bg);color:var(--hero-ink);border-radius:22px;overflow:hidden}
+.orn{height:16px;background-color:var(--hero-bg);
+  background-image:linear-gradient(135deg,var(--gold) 25%,transparent 25%),linear-gradient(225deg,var(--gold) 25%,transparent 25%),linear-gradient(315deg,var(--gold) 25%,transparent 25%),linear-gradient(45deg,var(--gold) 25%,transparent 25%);
+  background-size:16px 16px;background-position:-8px 0,-8px 0,0 0,0 0;border-bottom:3px solid var(--gold)}
+.hero-in{padding:20px 18px 22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-size:clamp(28px,8vw,40px);margin:4px 0 8px}
+.hero p{margin:0;opacity:.92;font-weight:600}
+.cards{display:grid;gap:14px;margin-top:20px}
+.card{display:block;text-decoration:none;color:inherit;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px 18px 16px}
+.card:hover,.card:focus-visible{border-color:var(--primary)}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card h2{font-size:21px;margin:6px 0 6px}
+.card p{margin:0 0 14px;color:var(--muted);font-weight:600}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.prog{font-weight:800;font-size:15px}
+.go{background:var(--gold);color:var(--on-gold);font-weight:800;font-size:17px;border-radius:14px;padding:11px 22px}
+.foot{margin-top:22px;color:var(--muted);font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero"><div class="orn"></div><div class="hero-in">
+    <div class="eyebrow">Тренажёр счёта</div>
+    <h1>Дроби Ернура</h1>
+    <p>Выбери игру и поднимайся к вершине. За правильные ответы даются звёзды и звания.</p>
+  </div></header>
+
+  <main class="cards">
+    <a class="card" href="drobi-1.html">
+      <span class="tag">Игра 1</span>
+      <h2>Сложение и вычитание</h2>
+      <p>Дроби и смешанные числа. Перевод десятичных дробей в обыкновенные и обратно.</p>
+      <span class="row"><span class="prog" id="p1">Звёзды: 0 из 72</span><span class="go">Играть</span></span>
+    </a>
+    <a class="card" href="drobi-2.html">
+      <span class="tag">Игра 2 · 6 класс</span>
+      <h2>Умножение и деление</h2>
+      <p>Дроби и смешанные числа, дробь от числа, уравнения, обратные числа.</p>
+      <span class="row"><span class="prog" id="p2">Звёзды: 0 из 90</span><span class="go">Играть</span></span>
+    </a>
+  </main>
+  <p class="foot">Прогресс сохраняется в этом браузере на этом устройстве.</p>
+</div>
+<script>
+(function(){
+  function stars(key){
+    try{
+      var o=JSON.parse(localStorage.getItem(key)||'null');
+      if(!o||!o.stars)return 0;
+      return Object.keys(o.stars).reduce(function(a,k){return a+(o.stars[k]||0);},0);
+    }catch(e){return 0;}
+  }
+  document.getElementById('p1').textContent='Звёзды: '+stars('ernur-drobi-v1')+' из 72';
+  document.getElementById('p2').textContent='Звёзды: '+stars('ernur-drobi-2-v1')+' из 90';
+})();
+</script>
+</body>
+</html>
