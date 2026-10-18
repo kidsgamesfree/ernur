@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Дроби Ернура</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+:root{
+  /* Вертикальный подъём: лагеря соединены одной тропой. Игровой экран: одна карточка с задачей по центру. */
+  --bg:#EDF5FA; --surface:#FFFFFF; --surface-2:#E1EEF7; --ink:#0C2740; --muted:#4D6A86; --line:#C6DAE8;
+  --primary:#0B6E99; --on-primary:#FFFFFF; --sky:#2AA9D6; --gold:#F5BE0B; --on-gold:#2B2000; --gold-deep:#A87C00;
+  --hero-bg:#0A5C85; --hero-ink:#FFFFFF;
+  --good:#0F6B49; --good-bg:#DCF2E8; --bad:#A32E22; --bad-bg:#FBE4E0; --warn:#6A4A00; --warn-bg:#FFF0C2; --lock:#8FA8BC;
+  --display:'Unbounded','Trebuchet MS',system-ui,sans-serif;
+  --body:'Nunito',system-ui,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08182A; --surface:#10283F; --surface-2:#173553; --ink:#E8F2FA; --muted:#9BB5CB; --line:#27465F;
+    --primary:#3DB8E3; --on-primary:#04182A; --sky:#4CC2EC; --gold:#F7C531; --on-gold:#2B2000; --gold-deep:#C99A10;
+    --hero-bg:#0D3552; --hero-ink:#F2F8FC;
+    --good:#6FE3B0; --good-bg:#0F3B2D; --bad:#FF9F94; --bad-bg:#4A1F1B; --warn:#FFD76A; --warn-bg:#42360E; --lock:#5E7C96;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08182A; --surface:#10283F; --surface-2:#173553; --ink:#E8F2FA; --muted:#9BB5CB; --line:#27465F;
+  --primary:#3DB8E3; --on-primary:#04182A; --sky:#4CC2EC; --gold:#F7C531; --on-gold:#2B2000; --gold-deep:#C99A10;
+  --hero-bg:#0D3552; --hero-ink:#F2F8FC;
+  --good:#6FE3B0; --good-bg:#0F3B2D; --bad:#FF9F94; --bad-bg:#4A1F1B; --warn:#FFD76A; --warn-bg:#42360E; --lock:#5E7C96;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-block:12px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+/* дроби */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 .12em}
+.fr .nu{padding:0 .22em .06em;border-bottom:.09em solid currentColor;min-width:1.1em;text-align:center}
+.fr .de{padding-top:.06em;text-align:center}
+.mx{display:inline-flex;align-items:center;gap:.12em}
+.op{opacity:.75;padding:0 .1em}
+.qm{color:var(--primary)}
+
+/* шапка */
+.hero{background:var(--hero-bg);color:var(--hero-ink);border-radius:22px;overflow:hidden}
+.orn{height:16px;background-color:var(--hero-bg);
+  background-image:
+    linear-gradient(135deg,var(--gold) 25%,transparent 25%),
+    linear-gradient(225deg,var(--gold) 25%,transparent 25%),
+    linear-gradient(315deg,var(--gold) 25%,transparent 25%),
+    linear-gradient(45deg,var(--gold) 25%,transparent 25%);
+  background-size:16px 16px;background-position:-8px 0,-8px 0,0 0,0 0;border-bottom:3px solid var(--gold)}
+.hero-in{padding:16px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.badge svg{width:68px;height:68px;display:block}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.hero h1{font-size:clamp(24px,6.5vw,32px);margin:2px 0 4px}
+.rank{font-weight:800}
+.xpbar{height:10px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden;margin-top:8px}
+.xpbar i{display:block;height:100%;width:var(--p);background:var(--gold);border-radius:99px}
+.hero-meta{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;font-size:13px;font-weight:700;margin-top:6px;opacity:.92}
+.hero-act{grid-column:1/-1;display:flex;gap:10px;align-items:stretch}
+.hero-act .btn{flex:1}
+.icon{width:50px;border:2px solid rgba(255,255,255,.35);background:transparent;color:var(--hero-ink);border-radius:14px;display:grid;place-items:center}
+.icon svg{width:24px;height:24px}
+
+/* кнопки */
+.btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;font-size:17px;background:var(--primary);color:var(--on-primary);line-height:1.2}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.gold{background:var(--gold);color:var(--on-gold)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn.pulse{box-shadow:0 0 0 0 var(--sky);animation:pulse 1.4s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* тропа */
+.journey{margin-top:24px;display:flex;flex-direction:column}
+.camp{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;position:relative;padding-bottom:26px}
+.camp:not(:last-child)::before{content:"";position:absolute;left:20.5px;top:46px;bottom:-2px;width:3px;background:var(--line);border-radius:2px}
+.camp.done:not(:last-child)::before{background:var(--gold)}
+.pin{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;background:var(--surface);border:3px solid var(--line);color:var(--muted)}
+.pin svg{width:22px;height:22px}
+.camp.open .pin{border-color:var(--primary);color:var(--primary)}
+.camp.done .pin{background:var(--gold);border-color:var(--gold-deep);color:var(--on-gold)}
+.camp.locked h2,.camp.locked p{opacity:.65}
+.camp h2{font-size:18px;padding-top:9px}
+.camp p{margin:4px 0 12px;color:var(--muted);font-size:15px}
+.lvls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lv{text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lv:hover:not(:disabled){border-color:var(--primary)}
+.lv:disabled{background:var(--surface-2);color:var(--muted)}
+.lv small{display:block;font-weight:800;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lv b{display:block;font-size:15px;line-height:1.2;margin-top:2px}
+.stars{display:flex;gap:2px;margin-top:auto}
+.stars svg{width:22px;height:22px}
+.s{fill:var(--surface-2);stroke:var(--lock);stroke-width:1.6;stroke-linejoin:round}
+.s.on{fill:var(--gold);stroke:var(--gold-deep)}
+@media (max-width:560px){
+  .lvls{grid-template-columns:1fr}
+  .lv{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .stars{margin-top:0}
+}
+
+/* игра */
+.top{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.back{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;font-weight:800;flex:none}
+.lvname{font-family:var(--display);font-size:13px;font-weight:600;text-align:center;min-width:0;flex:1}
+.xpchip{background:var(--gold);color:var(--on-gold);font-weight:800;border-radius:99px;padding:4px 12px;font-size:14px;flex:none;white-space:nowrap}
+.dots{display:flex;gap:6px;margin:14px 0}
+.dots i{flex:1;height:10px;border-radius:99px;background:var(--line)}
+.dots i.cur{background:var(--surface);outline:2px solid var(--primary)}
+.dots i.first{background:var(--gold)}
+.dots i.second{background:var(--sky)}
+.dots i.miss{background:var(--bad)}
+.qcard{background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:20px 16px 18px}
+.qprompt{color:var(--muted);font-weight:800;margin:0 0 14px;text-align:center}
+.expr{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.2em .4em;font-weight:800;font-size:clamp(28px,8.4vw,52px);min-height:1.9em}
+.ans{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 6px;font-weight:800;font-size:clamp(24px,7vw,40px)}
+.ans input{font:inherit;text-align:center;width:2.7em;min-width:78px;height:1.55em;border:3px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);padding:0 .1em}
+.ans input::placeholder{font-size:11px;font-weight:700;color:var(--muted)}
+.ans input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--sky)}
+.ans input:disabled{opacity:1}
+.fin{display:flex;flex-direction:column;align-items:center;gap:6px}
+.fin hr{width:100%;border:0;height:4px;background:var(--ink);border-radius:2px;margin:0}
+.ans.dec input{width:4.2em;min-width:150px}
+.ans.ok input{border-color:var(--good);background:var(--good-bg)}
+.ans.no input{border-color:var(--bad);background:var(--bad-bg)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.actions .go{flex:1;min-width:150px}
+.hl{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.hint,.stepsbox{margin-top:14px;background:var(--surface-2);border-radius:16px;padding:12px 14px;font-weight:600}
+.hint p{margin:0 0 4px}
+.stepsbox ol{margin:0;padding-left:22px}
+.stepsbox li{margin:8px 0;font-size:17px}
+.stepsbox li .fr{font-size:1.05em}
+.fb{margin-top:14px;border-radius:16px;padding:12px 14px;font-weight:800}
+.fb.good{background:var(--good-bg);color:var(--good)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.warn{background:var(--warn-bg);color:var(--warn)}
+.fb .fr{font-size:1.1em}
+.viz{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 8px;margin-top:10px;font-size:16px;font-weight:800}
+.vz-it{display:flex;flex-direction:column;align-items:center;gap:4px}
+.vz-bar{display:flex;gap:4px}
+.vz-u{display:flex;width:84px;height:26px;border:2px solid var(--ink);border-radius:7px;overflow:hidden;background:var(--surface)}
+.vz-u i{flex:1;border-right:1px solid var(--line)}
+.vz-u i:last-child{border-right:0}
+.vz-u i.on{background:var(--sky)}
+.vz-op{padding-bottom:20px;font-size:22px}
+
+/* результат */
+.rcard{background:var(--surface);border:2px solid var(--line);border-radius:24px;padding:26px 18px;text-align:center;margin-top:12px}
+.rcard h2{font-size:22px}
+.bigstars{display:flex;justify-content:center;gap:8px;margin:18px 0 8px}
+.bigstars svg{width:68px;height:68px;animation:pop .5s both}
+@keyframes pop{from{transform:scale(.3) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
+.rsum{margin:6px 0;font-size:18px;font-weight:700}
+.rxp{margin:6px 0 0;font-family:var(--display);font-weight:800;font-size:22px}
+.rup{margin:14px auto 0;background:var(--gold);color:var(--on-gold);border-radius:14px;padding:10px 14px;font-weight:800;display:inline-block}
+.rcard .actions{justify-content:center;margin-top:22px}
+
+/* настройки */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(5,20,35,.58);display:grid;place-items:center;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet-in{background:var(--surface);color:var(--ink);border-radius:22px;padding:20px;width:min(440px,100%);max-height:100%;overflow:auto}
+.sheet h2{font-size:18px;margin-bottom:12px}
+.tg{display:flex;gap:12px;align-items:flex-start;padding:10px 0;font-weight:700}
+.tg input{width:22px;height:22px;margin-top:2px;accent-color:var(--primary);flex:none}
+.tg small{display:block;color:var(--muted);font-weight:600}
+.note{color:var(--muted);font-size:14px;margin:10px 0 0}
+.danger{background:var(--bad-bg);color:var(--bad)}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+.confetti i{position:absolute;top:0;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{from{transform:translateY(-12vh) rotate(0)}to{transform:translateY(112vh) rotate(560deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <section id="home"></section>
+
+  <section id="play" hidden>
+    <div class="top">
+      <button class="back" id="btnBack" type="button">← Карта</button>
+      <div class="lvname" id="lvTitle"></div>
+      <div class="xpchip" id="xpchip">0 XP</div>
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="qcard">
+      <p class="qprompt" id="qprompt"></p>
+      <div class="expr" id="expr"></div>
+      <div class="ans" id="ans"></div>
+      <div class="actions">
+        <button class="btn ghost" id="btnHint" type="button">Подсказка</button>
+        <button class="btn go" id="btnCheck" type="button">Проверить</button>
+      </div>
+      <div class="hint" id="hintBox" hidden></div>
+      <div class="fb" id="fb" role="status" aria-live="polite" hidden></div>
+      <div class="stepsbox" id="stepsBox" hidden></div>
+    </div>
+  </section>
+
+  <section id="result" hidden></section>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in" role="dialog" aria-label="Настройки">
+    <h2>Настройки</h2>
+    <label class="tg"><input type="checkbox" id="optSound"><span>Звуки<small>Короткие сигналы за верные и неверные ответы.</small></span></label>
+    <label class="tg"><input type="checkbox" id="optOpen"><span>Открыть все лагеря<small>Для родителей: можно начать с любой темы.</small></span></label>
+    <p class="note">Прогресс хранится в этом браузере на этом устройстве.</p>
+    <div class="actions">
+      <button class="btn ghost" id="btnReset" type="button">Сбросить прогресс</button>
+      <button class="btn go" id="btnClose" type="button">Готово</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ==GEN-START
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const lcm=(a,b)=>a/gcd(a,b)*b;
+const red=(n,d)=>{const g=gcd(n,d)||1;return [n/g,d/g];};
+const pad=(k,n)=>String(k).padStart(n,'0');
+const F=(n,d)=>'<span class="fr"><span class="nu">'+n+'</span><span class="de">'+d+'</span></span>';
+const M=(w,n,d)=>'<span class="mx"><span>'+w+'</span>'+F(n,d)+'</span>';
+const OP=s=>'<span class="op">'+s+'</span>';
+const QM='<span class="qm">?</span>';
+const fracHTML=(N,D)=>D===1?String(N):F(N,D);
+const mixedHTML=(N,D)=>{const w=Math.floor(N/D),r=N%D;if(r===0)return String(w);return w?M(w,r,D):F(r,D);};
+const properIrr=d=>{let n;do{n=ri(1,d-1);}while(gcd(n,d)!==1);return n;};
+const ratAdd=(a,b)=>red(a[0]*b[1]+b[0]*a[1],a[1]*b[1]);
+const ratSub=(a,b)=>red(a[0]*b[1]-b[0]*a[1],a[1]*b[1]);
+const PAIRS=[[2,3],[2,4],[2,5],[3,4],[3,6],[2,6],[4,8],[3,5],[4,6],[5,10]];
+const ZN=['','один знак','два знака','три знака'];
+function pairDen(){let p=pick(PAIRS);return Math.random()<.5?[p[1],p[0]]:p;}
+
+/* завершение решения: сократить, выделить целую часть, записать ответ */
+function tail(s,N,D,mode){
+  const g=gcd(N,D),n=N/g,d=D/g;
+  if(g>1)s.push('Сокращаем на '+g+': '+F(N,D)+' = '+fracHTML(n,d)+'.');
+  if(mode==='mixed'&&d>1&&n>d){const w=Math.floor(n/d),r=n%d;s.push('Выделяем целую часть: '+n+' ÷ '+d+' = '+w+', остаток '+r+'.');}
+  s.push('<b>Ответ: '+(mode==='mixed'?mixedHTML(n,d):fracHTML(n,d))+'</b>');
+}
+function stepsFrac(n1,d1,op,n2,d2,mode){
+  const s=[],L=lcm(d1,d2),a=n1*(L/d1),b=n2*(L/d2),sg=op==='+'?'+':'−';
+  if(d1!==d2){
+    s.push('Знаменатели разные. Ищем общий знаменатель — наименьшее число, которое делится и на '+d1+', и на '+d2+': это <b>'+L+'</b>.');
+    s.push('Приводим дроби: '+F(n1,d1)+' = '+F(a,L)+' (умножили на '+(L/d1)+'), '+F(n2,d2)+' = '+F(b,L)+' (умножили на '+(L/d2)+').');
+  }else{
+    s.push('Знаменатели одинаковые ('+d1+'), поэтому знаменатель оставляем, а числители '+(op==='+'?'складываем':'вычитаем')+'.');
+  }
+  const r=op==='+'?a+b:a-b;
+  s.push(a+' '+sg+' '+b+' = '+r+', получаем '+F(r,L)+'.');
+  tail(s,r,L,mode);
+  return s;
+}
+function mixedSteps(w1,n1,d1,op,w2,n2,d2){
+  const s=[],L=lcm(d1,d2),f1=n1*(L/d1),f2=n2*(L/d2);
+  if(d1!==d2)s.push('Приводим дробные части к общему знаменателю '+L+': '+F(n1,d1)+' = '+F(f1,L)+', '+F(n2,d2)+' = '+F(f2,L)+'.');
+  let W,N;
+  if(op==='+'){
+    W=w1+w2;N=f1+f2;
+    s.push('Складываем целые части: '+w1+' + '+w2+' = '+W+'. Складываем дробные части: '+f1+' + '+f2+' = '+N+', то есть '+F(N,L)+'.');
+    if(N>=L){
+      const c=Math.floor(N/L),rest=N-c*L;
+      s.push(F(N,L)+' — это '+(c===1?'одна целая':c+' целых')+(rest?' и '+F(rest,L):'')+'. Добавляем к целой части: '+W+' + '+c+' = '+(W+c)+'.');
+      W+=c;N=rest;
+    }
+  }else{
+    if(f1>=f2){
+      W=w1-w2;N=f1-f2;
+      s.push('Вычитаем целые части: '+w1+' − '+w2+' = '+W+'. Вычитаем дробные части: '+f1+' − '+f2+' = '+N+'.');
+    }else{
+      s.push('Дробную часть '+F(f1,L)+' нельзя вычесть из '+F(f2,L)+', она меньше. Займём единицу у целой части: от '+w1+' останется '+(w1-1)+', а дробная часть станет '+F(f1,L)+' + 1 = '+F(f1+L,L)+'.');
+      W=w1-1-w2;N=f1+L-f2;
+      s.push('Теперь вычитаем целые части: '+(w1-1)+' − '+w2+' = '+W+'. Вычитаем дробные части: '+(f1+L)+' − '+f2+' = '+N+'.');
+    }
+  }
+  if(N===0){s.push('<b>Ответ: '+W+'</b>');}
+  else{
+    const g=gcd(N,L),nn=N/g,dd=L/g;
+    if(g>1)s.push('Сокращаем '+F(N,L)+' = '+F(nn,dd)+'.');
+    s.push('<b>Ответ: '+(W?M(W,nn,dd):F(nn,dd))+'</b>');
+  }
+  return s;
+}
+function decSteps(n,d,w){
+  let P=10;while(P%d!==0)P*=10;
+  const m=P/d,digits=String(P).length-1,txt=pad(n*m,digits),s=[];
+  if(w)s.push('Целую часть '+w+' оставляем, переводим дробную часть '+F(n,d)+'.');
+  if(m>1)s.push('Умножаем числитель и знаменатель на '+m+', чтобы знаменатель стал '+P+': '+F(n,d)+' = '+F(n*m,P)+'.');
+  s.push('В знаменателе '+P+' — '+ZN[digits]+' после запятой: '+F(n*m,P)+' = 0,'+txt+'.');
+  if(w)s.push('<b>Ответ: '+w+','+txt+'</b>');else s.push('<b>Ответ: 0,'+txt+'</b>');
+  return {s:s,P:P,m:m,text:(w||0)+','+txt};
+}
+const mixVal=(w,n,d)=>[w*d+n,d];
+const toViz=(w,n,d)=>({n:w*d+n,d:d});
+
+/* ---------- сложение ---------- */
+function genAdd1(){
+  const d=ri(3,12),n1=ri(1,d-2),n2=ri(1,d-1-n1);
+  return {prompt:'Сложи дроби. Если можно, сократи ответ.',expr:F(n1,d)+OP('+')+F(n2,d),mode:'frac',ans:red(n1+n2,d),
+    hint:'Знаменатели одинаковые, поэтому знаменатель не меняется. Складывай только числители.',
+    steps:stepsFrac(n1,d,'+',n2,d,'frac'),viz:[{n:n1,d:d},'+',{n:n2,d:d}]};
+}
+function genAdd2(){
+  const d=ri(4,12),n1=ri(2,d-1),n2=ri(d-n1+1,d-1);
+  return {prompt:'Сложи дроби. Ответ запиши смешанным числом.',expr:F(n1,d)+OP('+')+F(n2,d),mode:'mixed',ans:red(n1+n2,d),
+    hint:'Сложи числители. Если числитель получился больше знаменателя, выдели целую часть: раздели числитель на знаменатель.',
+    steps:stepsFrac(n1,d,'+',n2,d,'mixed'),viz:[{n:n1,d:d},'+',{n:n2,d:d}]};
+}
+function genAdd3(){
+  for(;;){
+    const p=pairDen(),da=p[0],db=p[1],na=properIrr(da),nb=properIrr(db);
+    const r=ratAdd([na,da],[nb,db]);
+    if(r[1]===1)continue;
+    const mode=r[0]>r[1]?'mixed':'frac';
+    return {prompt:mode==='mixed'?'Сложи дроби. Ответ запиши смешанным числом.':'Сложи дроби. Если можно, сократи ответ.',
+      expr:F(na,da)+OP('+')+F(nb,db),mode:mode,ans:r,
+      hint:'Найди общий знаменатель: число, которое делится и на '+da+', и на '+db+'. Приведи обе дроби к нему и сложи числители.',
+      steps:stepsFrac(na,da,'+',nb,db,mode),viz:[{n:na,d:da},'+',{n:nb,d:db}]};
+  }
+}
+/* ---------- вычитание ---------- */
+function genSub1(){
+  const d=ri(4,12),n1=ri(2,d-1),n2=ri(1,n1-1);
+  return {prompt:'Вычти дроби. Если можно, сократи ответ.',expr:F(n1,d)+OP('−')+F(n2,d),mode:'frac',ans:red(n1-n2,d),
+    hint:'Знаменатели одинаковые. Вычитай только числители, знаменатель оставь.',
+    steps:stepsFrac(n1,d,'−',n2,d,'frac'),viz:[{n:n1,d:d},'−',{n:n2,d:d}]};
+}
+function genSub2(){
+  const a=ri(1,4),d=ri(3,10),n=properIrr(d),mode=a===1?'frac':'mixed';
+  const s=['Целое число '+a+' запишем дробью со знаменателем '+d+': '+a+' = '+F(a*d,d)+'.',
+    a*d+' − '+n+' = '+(a*d-n)+', получаем '+F(a*d-n,d)+'.'];
+  tail(s,a*d-n,d,mode);
+  return {prompt:a===1?'Вычти. Если можно, сократи ответ.':'Вычти. Ответ запиши смешанным числом.',expr:a+OP('−')+F(n,d),mode:mode,ans:red(a*d-n,d),
+    hint:'Запиши целое число дробью с тем же знаменателем: '+a+' = '+F(a*d,d)+'. Потом вычитай числители.',
+    steps:s,viz:[{n:a*d,d:d},'−',{n:n,d:d}]};
+}
+function genSub3(){
+  for(;;){
+    const p=pairDen(),da=p[0],db=p[1],x=[properIrr(da),da],y=[properIrr(db),db];
+    const c=x[0]*y[1]-y[0]*x[1];
+    if(c===0)continue;
+    const A=c>0?x:y,B=c>0?y:x;
+    return {prompt:'Вычти дроби. Если можно, сократи ответ.',expr:F(A[0],A[1])+OP('−')+F(B[0],B[1]),mode:'frac',ans:ratSub(A,B),
+      hint:'Найди общий знаменатель: число, которое делится и на '+A[1]+', и на '+B[1]+'. Приведи дроби к нему и вычти числители.',
+      steps:stepsFrac(A[0],A[1],'−',B[0],B[1],'frac'),viz:[{n:A[0],d:A[1]},'−',{n:B[0],d:B[1]}]};
+  }
+}
+/* ---------- смешанное число и неправильная дробь ---------- */
+function genConv1(){
+  const w=ri(1,4),d=ri(2,6),n=properIrr(d),N=w*d+n;
+  return {prompt:'Запиши смешанное число в виде неправильной дроби.',expr:M(w,n,d),mode:'frac',ans:[N,d],
+    hint:'Умножь целую часть на знаменатель и прибавь числитель. Это новый числитель. Знаменатель не меняется.',
+    steps:['Умножаем целую часть на знаменатель: '+w+' × '+d+' = '+(w*d)+'.','Прибавляем числитель: '+(w*d)+' + '+n+' = '+N+'.','Знаменатель оставляем прежним.','<b>Ответ: '+F(N,d)+'</b>'],
+    viz:[{n:N,d:d}]};
+}
+function genConv2(){
+  const d=ri(2,8),w=ri(1,5),n=properIrr(d),N=w*d+n;
+  return {prompt:'Выдели целую часть. Ответ запиши смешанным числом.',expr:F(N,d),mode:'mixed',ans:[N,d],
+    hint:'Раздели числитель на знаменатель. Частное — целая часть, остаток — новый числитель.',
+    steps:['Делим числитель на знаменатель: '+N+' ÷ '+d+' = '+w+', остаток '+n+'.','Целая часть — '+w+'. Остаток '+n+' становится числителем, знаменатель прежний.','<b>Ответ: '+M(w,n,d)+'</b>'],
+    viz:[{n:N,d:d}]};
+}
+function genConv3(){
+  const d=pick([4,6,8,10,12]),w=ri(2,8),n=ri(1,d-1),N=w*d+n;
+  if(Math.random()<.5){
+    const s=['Умножаем целую часть на знаменатель и прибавляем числитель: '+w+' × '+d+' + '+n+' = '+N+'.','Получаем '+F(N,d)+'.'];
+    tail(s,N,d,'frac');
+    return {prompt:'Запиши в виде неправильной дроби. Если можно, сократи.',expr:M(w,n,d),mode:'frac',ans:red(N,d),
+      hint:'Целая часть × знаменатель + числитель. Потом проверь, нельзя ли сократить.',steps:s,viz:null};
+  }
+  const s=['Делим числитель на знаменатель: '+N+' ÷ '+d+' = '+w+', остаток '+n+'. Получаем '+M(w,n,d)+'.'];
+  const g=gcd(n,d);
+  if(g>1)s.push('Дробную часть сокращаем на '+g+': '+F(n,d)+' = '+F(n/g,d/g)+'.');
+  s.push('<b>Ответ: '+mixedHTML(N,d)+'</b>');
+  return {prompt:'Выдели целую часть. Дробную часть сократи.',expr:F(N,d),mode:'mixed',ans:red(N,d),
+    hint:'Раздели числитель на знаменатель. Остаток — числитель дробной части. Её можно сократить.',steps:s,viz:null};
+}
+/* ---------- смешанные числа: сложение ---------- */
+function genMAdd(w1,n1,w2,n2,d1,d2,hint){
+  const v1=mixVal(w1,n1,d1),v2=mixVal(w2,n2,d2);
+  return {prompt:'Запиши ответ смешанным числом. Дробную часть сократи.',expr:M(w1,n1,d1)+OP('+')+M(w2,n2,d2),mode:'mixed',ans:ratAdd(v1,v2),
+    hint:hint,steps:mixedSteps(w1,n1,d1,'+',w2,n2,d2),viz:[toViz(w1,n1,d1),'+',toViz(w2,n2,d2)]};
+}
+function genMAdd1(){
+  const d=ri(3,9),n1=ri(1,d-2),n2=ri(1,d-1-n1);
+  return genMAdd(ri(1,5),n1,ri(1,5),n2,d,d,'Складывай отдельно целые части и отдельно дробные.');
+}
+function genMAdd2(){
+  const d=ri(4,9),n1=ri(2,d-1),n2=ri(d-n1,d-1);
+  return genMAdd(ri(1,5),n1,ri(1,5),n2,d,d,'Складывай целые и дробные части отдельно. Если дробей получилось больше единицы, лишнюю целую прибавь к целым.');
+}
+function genMAdd3(){
+  const p=pairDen();
+  return genMAdd(ri(1,4),properIrr(p[0]),ri(1,4),properIrr(p[1]),p[0],p[1],'Сначала приведи дробные части к общему знаменателю, потом складывай целые и дробные части отдельно.');
+}
+/* ---------- смешанные числа: вычитание ---------- */
+function genMSub(w1,n1,d1,w2,n2,d2,hint,steps,exprFirst){
+  const v1=mixVal(w1,n1,d1),v2=mixVal(w2,n2,d2);
+  return {prompt:'Запиши ответ смешанным числом. Дробную часть сократи.',expr:exprFirst||(M(w1,n1,d1)+OP('−')+M(w2,n2,d2)),mode:'mixed',ans:ratSub(v1,v2),
+    hint:hint,steps:steps||mixedSteps(w1,n1,d1,'−',w2,n2,d2),viz:[toViz(w1,n1,d1),'−',toViz(w2,n2,d2)]};
+}
+function genMSub1(){
+  const d=ri(3,9),w1=ri(3,8),w2=ri(1,w1-1),n2=ri(1,d-2),n1=ri(n2+1,d-1);
+  return genMSub(w1,n1,d,w2,n2,d,'Вычитай отдельно целые части и отдельно дробные.');
+}
+function genMSub2(){
+  if(Math.random()<.35){
+    const a=ri(3,9),d=ri(3,8),n2=properIrr(d),w2=ri(1,a-1);
+    const s=['У числа '+a+' нет дробной части, поэтому займём единицу: '+a+' = '+(a-1)+' + 1 = '+M(a-1,d,d)+'.'].concat(mixedSteps(a-1,d,d,'−',w2,n2,d));
+    const o=genMSub(a-1,d,d,w2,n2,d,'Займи единицу у целого числа и запиши её дробью со знаменателем '+d+'.',s,a+OP('−')+M(w2,n2,d));
+    o.viz=[{n:a*d,d:d},'−',toViz(w2,n2,d)];
+    return o;
+  }
+  const d=ri(4,9),n1=ri(1,d-2),n2=ri(n1+1,d-1),w1=ri(3,8),w2=ri(1,w1-1);
+  return genMSub(w1,n1,d,w2,n2,d,'Дробь '+F(n1,d)+' меньше, чем '+F(n2,d)+'. Займи единицу у целой части и прибавь её к дроби: 1 = '+F(d,d)+'.');
+}
+function genMSub3(){
+  const p=pairDen(),w1=ri(3,7),w2=ri(1,w1-1);
+  return genMSub(w1,properIrr(p[0]),p[0],w2,properIrr(p[1]),p[1],'Приведи дробные части к общему знаменателю. Если вычесть нельзя, займи единицу у целой части.');
+}
+/* ---------- десятичные в обыкновенные ---------- */
+function genD2F1(){
+  const k=ri(1,9),s=['Один знак после запятой — знаменатель 10: 0,'+k+' = '+F(k,10)+'.'];
+  tail(s,k,10,'frac');
+  return {prompt:'Запиши десятичную дробь обыкновенной. Сократи, если можно.',expr:'0,'+k,mode:'frac',ans:red(k,10),
+    hint:'0,'+k+' — это '+k+' десятых. Один знак после запятой, значит знаменатель 10. Потом сократи.',steps:s,viz:null};
+}
+function genD2F2(){
+  let k;do{k=ri(1,99);}while(k%10===0);
+  const s=['Два знака после запятой — знаменатель 100: 0,'+pad(k,2)+' = '+F(k,100)+'.'];
+  tail(s,k,100,'frac');
+  return {prompt:'Запиши десятичную дробь обыкновенной. Сократи, если можно.',expr:'0,'+pad(k,2),mode:'frac',ans:red(k,100),
+    hint:'Два знака после запятой — значит знаменатель 100. В числитель запиши число после запятой, потом сократи.',steps:s,viz:null};
+}
+function genD2F3(){
+  if(Math.random()<.5){
+    const w=ri(1,5),p=pick([1,2]),P=p===1?10:100;
+    let k;do{k=ri(1,P-1);}while(p===2&&k%10===0);
+    const g=gcd(k,P),s=['Целую часть '+w+' оставляем. Дробная часть: 0,'+pad(k,p)+' = '+F(k,P)+'.'];
+    if(g>1)s.push('Сокращаем на '+g+': '+F(k,P)+' = '+F(k/g,P/g)+'.');
+    s.push('<b>Ответ: '+M(w,k/g,P/g)+'</b>');
+    return {prompt:'Запиши в виде смешанного числа. Дробную часть сократи.',expr:w+','+pad(k,p),mode:'mixed',ans:red(w*P+k,P),
+      hint:'Целая часть остаётся целой. Дробную часть после запятой запиши обыкновенной дробью и сократи.',steps:s,viz:null};
+  }
+  const k=pick([25,75,125,375,625,875,24,36,48,64]);
+  const s=['Три знака после запятой — знаменатель 1000: 0,'+pad(k,3)+' = '+F(k,1000)+'.'];
+  tail(s,k,1000,'frac');
+  return {prompt:'Запиши десятичную дробь обыкновенной. Сократи, если можно.',expr:'0,'+pad(k,3),mode:'frac',ans:red(k,1000),
+    hint:'Три знака после запятой — значит знаменатель 1000. Потом сократи: подойдёт деление на 5, на 25 или на 125.',steps:s,viz:null};
+}
+/* ---------- обыкновенные в десятичные ---------- */
+function genF2D(n,d,w,prompt){
+  const ds=decSteps(n,d,w),P=ds.P;
+  return {prompt:prompt||'Запиши в виде десятичной дроби, например 0,75.',expr:w?M(w,n,d):F(n,d),mode:'dec',
+    ans:red(w*d+n,d),decText:ds.text,
+    hint:'На какое число нужно умножить '+d+', чтобы получить '+P+'? На него же умножь и числитель. Или раздели числитель на знаменатель.',
+    steps:ds.s,viz:null};
+}
+function genF2D1(){
+  const t=ri(0,3);
+  if(t===0)return genF2D(ri(1,9),10,0);
+  if(t===1){let n;do{n=ri(1,99);}while(n%10===0);return genF2D(n,100,0);}
+  if(t===2)return genF2D(1,2,0);
+  return genF2D(ri(1,4),5,0);
+}
+function genF2D2(){const d=pick([4,20,25,50]);return genF2D(properIrr(d),d,0);}
+function genF2D3(){
+  if(Math.random()<.65){const d=pick([2,4,5,8,10,20,25]);return genF2D(properIrr(d),d,ri(1,6));}
+  return genF2D(pick([1,3,5,7]),8,0);
+}
+/* ---------- карта ---------- */
+const MISSIONS=[
+  {title:'Сложение дробей',blurb:'Складывай числители, а знаменатель выбирай внимательно.',
+   levels:[{name:'Одинаковые знаменатели',gen:genAdd1},{name:'Ответ больше единицы',gen:genAdd2},{name:'Разные знаменатели',gen:genAdd3}]},
+  {title:'Вычитание дробей',blurb:'Вычитай части целого и не забывай сокращать.',
+   levels:[{name:'Одинаковые знаменатели',gen:genSub1},{name:'Целое минус дробь',gen:genSub2},{name:'Разные знаменатели',gen:genSub3}]},
+  {title:'Целые и неправильные дроби',blurb:'Смешанное число и неправильная дробь — это одно и то же число.',
+   levels:[{name:'Смешанное в дробь',gen:genConv1},{name:'Дробь в смешанное',gen:genConv2},{name:'Оба вида, числа крупнее',gen:genConv3}]},
+  {title:'Смешанные числа: сложение',blurb:'Целые отдельно, дроби отдельно.',
+   levels:[{name:'Без переноса',gen:genMAdd1},{name:'С переносом единицы',gen:genMAdd2},{name:'Разные знаменатели',gen:genMAdd3}]},
+  {title:'Смешанные числа: вычитание',blurb:'Иногда нужно занять единицу у целой части.',
+   levels:[{name:'Без займа',gen:genMSub1},{name:'С займом',gen:genMSub2},{name:'Разные знаменатели',gen:genMSub3}]},
+  {title:'Десятичные дроби в обыкновенные',blurb:'Сколько знаков после запятой, столько нулей в знаменателе.',
+   levels:[{name:'Десятые',gen:genD2F1},{name:'Сотые',gen:genD2F2},{name:'Целые и тысячные',gen:genD2F3}]},
+  {title:'Обыкновенные дроби в десятичные',blurb:'Сделай знаменатель равным 10, 100 или 1000.',
+   levels:[{name:'Знаменатели 2, 5, 10, 100',gen:genF2D1},{name:'Знаменатели 4, 20, 25, 50',gen:genF2D2},{name:'Смешанные числа и восьмые',gen:genF2D3}]},
+  {title:'Вершина',blurb:'Все темы вперемешку. Экзамен на батыра.',levels:[]}
+];
+(function(){
+  const base=MISSIONS.slice(0,7);
+  MISSIONS[7].levels=['Разминка','Подъём','Штурм'].map((name,li)=>({name:name,gen:()=>pick(base).levels[li].gen()}));
+})();
+// ==GEN-END
+
+/* ---------- прогресс ---------- */
+const KEY='ernur-drobi-v1';
+let save={xp:0,stars:{},sound:true,openAll:false};
+try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object'){save=Object.assign(save,o);if(!save.stars||typeof save.stars!=='object')save.stars={};}}}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+const RANKS=[{name:'Новичок',xp:0},{name:'Следопыт',xp:100},{name:'Знаток',xp:300},{name:'Мастер дробей',xp:700},{name:'Батыр',xp:1300}];
+const rankOf=xp=>{let i=0;RANKS.forEach((r,k)=>{if(xp>=r.xp)i=k;});return i;};
+const lvStars=(m,l)=>save.stars[m+'-'+l]||0;
+const campStars=m=>lvStars(m,0)+lvStars(m,1)+lvStars(m,2);
+const campOpen=m=>save.openAll||m===0||lvStars(m-1,2)>=1;
+const lvOpen=(m,l)=>save.openAll||(campOpen(m)&&(l===0||lvStars(m,l-1)>=1));
+const totalStars=()=>Object.keys(save.stars).reduce((a,k)=>a+(save.stars[k]||0),0);
+const MAXSTARS=MISSIONS.length*9;
+
+const $=s=>document.querySelector(s);
+const starSvg=on=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path class="s'+(on?' on':'')+'" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+const starsRow=n=>'<span class="stars" aria-label="Звёзд: '+n+' из 3">'+starSvg(n>=1)+starSvg(n>=2)+starSvg(n>=3)+'</span>';
+const lockSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const checkSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const flagSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4"/><path d="M6 5h11l-2.5 3.5L17 12H6"/></svg>';
+const gearSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+
+/* ---------- звук ---------- */
+let AC=null;
+function tone(f,t0,dur,type){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+t0;
+    o.type=type||'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.18,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur+0.03);
+  }catch(e){}
+}
+function sfx(k){
+  if(!save.sound)return;
+  if(k==='ok'){tone(660,0,.12);tone(880,.1,.18);}
+  else if(k==='bad'){tone(220,0,.22,'triangle');}
+  else if(k==='win'){[523,659,784,1047].forEach((f,i)=>tone(f,i*.12,.24));}
+}
+function confetti(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const box=document.createElement('div');box.className='confetti';
+  const cols=['#F5BE0B','#2AA9D6','#0B6E99','#FFFFFF','#F7C531'];
+  for(let i=0;i<42;i++){
+    const e=document.createElement('i');
+    e.style.left=Math.random()*100+'%';e.style.background=cols[i%cols.length];
+    e.style.animationDuration=(1.8+Math.random()*1.6)+'s';e.style.animationDelay=(Math.random()*.6)+'s';
+    box.appendChild(e);
+  }
+  document.body.appendChild(box);setTimeout(()=>box.remove(),4200);
+}
+
+/* ---------- карта ---------- */
+function nextTarget(){
+  for(let pass=0;pass<2;pass++){
+    for(let m=0;m<MISSIONS.length;m++)for(let l=0;l<3;l++){
+      if(!lvOpen(m,l))continue;
+      const s=lvStars(m,l);
+      if(pass===0?s===0:s<3)return {m:m,l:l};
+    }
+  }
+  return null;
+}
+function renderHome(){
+  const xp=save.xp,k=rankOf(xp),r=RANKS[k],nx=RANKS[k+1];
+  const pct=nx?Math.round((xp-r.xp)/(nx.xp-r.xp)*100):100;
+  const tg=nextTarget();
+  let h='<header class="hero"><div class="orn"></div><div class="hero-in">'+
+    '<div class="badge"><svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="32,3 58,18 58,46 32,61 6,46 6,18" fill="var(--gold)" stroke="var(--gold-deep)" stroke-width="3" stroke-linejoin="round"/>'+
+    '<text x="32" y="41" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="26" fill="var(--on-gold)">'+(k+1)+'</text></svg></div>'+
+    '<div><div class="eyebrow">Тренажёр счёта</div><h1>Дроби Ернура</h1>'+
+    '<div class="rank">'+r.name+' · '+xp+' XP</div>'+
+    '<div class="xpbar" style="--p:'+pct+'%"><i></i></div>'+
+    '<div class="hero-meta"><span>'+(nx?'До звания «'+nx.name+'»: '+(nx.xp-xp)+' XP':'Высшее звание')+'</span><span>Звёзды: '+totalStars()+' из '+MAXSTARS+'</span></div></div>'+
+    '<div class="hero-act">'+(tg?'<button class="btn gold" id="goOn" type="button">'+(totalStars()?'Играть дальше':'Начать подъём')+'</button>':'<button class="btn gold" id="goOn" type="button" disabled>Все звёзды собраны</button>')+
+    '<button class="icon" id="btnSet" type="button" aria-label="Настройки">'+gearSvg+'</button></div></div></header>';
+  h+='<div class="journey">';
+  MISSIONS.forEach((m,mi)=>{
+    const open=campOpen(mi),cs=campStars(mi),done=cs>=9,last=mi===MISSIONS.length-1;
+    const pin=done?checkSvg:!open?lockSvg:last?flagSvg:String(mi+1);
+    h+='<article class="camp '+(done?'done':open?'open':'locked')+'"><div class="pin">'+pin+'</div><div><h2>'+m.title+'</h2><p>'+m.blurb+'</p>';
+    if(open){
+      h+='<div class="lvls">';
+      m.levels.forEach((lv,li)=>{
+        const ok=lvOpen(mi,li);
+        h+='<button class="lv" type="button" data-m="'+mi+'" data-l="'+li+'"'+(ok?'':' disabled')+'><span><small>Уровень '+(li+1)+'</small><b>'+lv.name+'</b></span>'+starsRow(lvStars(mi,li))+'</button>';
+      });
+      h+='</div>';
+    }else{
+      h+='<p>Откроется после лагеря «'+MISSIONS[mi-1].title+'».</p>';
+    }
+    h+='</div></article>';
+  });
+  h+='</div>';
+  $('#home').innerHTML=h;
+}
+function show(id){
+  ['home','play','result'].forEach(k=>{$('#'+k).hidden=(k!==id);});
+  if(id==='home')renderHome();
+  try{window.scrollTo(0,0);}catch(e){}
+}
+
+/* ---------- игра ---------- */
+let S=null;
+const cur=()=>S.qs[S.i];
+const PRAISE=['Верно!','Точно!','Отлично, Ернур!','Так держать!','Чётко!','Правильно!','Молодец!'];
+
+function start(mi,li){
+  const lv=MISSIONS[mi].levels[li],qs=[],seen={};let guard=0;
+  while(qs.length<8&&guard++<300){const q=lv.gen();if(seen[q.expr])continue;seen[q.expr]=1;qs.push(q);}
+  S={mi:mi,li:li,qs:qs,i:0,res:[],xp:0,streak:0,attempt:0,hint:false,done:false,stepsOpen:false};
+  $('#lvTitle').textContent=MISSIONS[mi].title+' · '+lv.name;
+  show('play');renderQ();
+}
+function vizItem(n,d){
+  let h='<span class="vz-it"><span class="vz-bar">';
+  const units=Math.ceil(n/d);
+  for(let u=0;u<units;u++){
+    const filled=Math.min(d,n-u*d);
+    h+='<span class="vz-u">';
+    for(let i=0;i<d;i++)h+='<i'+(i<filled?' class="on"':'')+'></i>';
+    h+='</span>';
+  }
+  return h+'</span><span>'+F(n,d)+'</span></span>';
+}
+function renderViz(v){
+  if(!v)return '';
+  let units=0,ok=true;
+  v.forEach(t=>{if(typeof t==='object'){units+=Math.ceil(t.n/t.d);if(t.d>12)ok=false;}});
+  if(!ok||units>8)return '';
+  let h='<div class="viz" aria-hidden="true">';
+  v.forEach(t=>{h+=typeof t==='object'?vizItem(t.n,t.d):'<span class="vz-op">'+(t==='−'?'−':t)+'</span>';});
+  return h+'</div>';
+}
+function ansText(q){
+  if(q.mode==='dec')return q.decText;
+  return q.mode==='mixed'?mixedHTML(q.ans[0],q.ans[1]):fracHTML(q.ans[0],q.ans[1]);
+}
+function renderDots(){
+  let h='';
+  for(let k=0;k<S.qs.length;k++){
+    const r=S.res[k];
+    h+='<i class="'+(r||(k===S.i?'cur':''))+'"></i>';
+  }
+  $('#dots').innerHTML=h;
+}
+function renderQ(){
+  const q=cur();
+  S.attempt=0;S.hint=false;S.done=false;S.stepsOpen=false;
+  renderDots();updateChip();
+  $('#qprompt').textContent=q.prompt;
+  $('#expr').innerHTML=q.expr+OP('=')+QM;
+  let a;
+  if(q.mode==='frac')a='<div class="fin"><input id="a-n" data-int inputmode="numeric" maxlength="4" autocomplete="off" aria-label="Числитель" placeholder="числитель"><hr><input id="a-d" data-int inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Знаменатель" placeholder="знаменатель"></div>';
+  else if(q.mode==='mixed')a='<input id="a-w" data-int inputmode="numeric" maxlength="2" autocomplete="off" aria-label="Целая часть" placeholder="целые"><div class="fin"><input id="a-n" data-int inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Числитель" placeholder="числитель"><hr><input id="a-d" data-int inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Знаменатель" placeholder="знаменатель"></div>';
+  else a='<input id="a-x" data-dec inputmode="decimal" maxlength="7" autocomplete="off" aria-label="Ответ десятичной дробью" placeholder="ответ">';
+  const box=$('#ans');
+  box.className='ans'+(q.mode==='dec'?' dec':'');
+  box.innerHTML=a;
+  box.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      inp.value=inp.hasAttribute('data-dec')?inp.value.replace(/[^0-9.,]/g,''):inp.value.replace(/\D/g,'');
+    });
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submit();}});
+  });
+  $('#hintBox').hidden=true;$('#hintBox').innerHTML='';
+  $('#stepsBox').hidden=true;$('#stepsBox').innerHTML='';
+  const fb=$('#fb');fb.hidden=true;fb.textContent='';fb.className='fb';
+  const bh=$('#btnHint');bh.hidden=false;bh.textContent='Подсказка';bh.classList.remove('pulse');
+  $('#btnCheck').textContent='Проверить';
+  const first=box.querySelector('input');
+  if(first){try{first.focus({preventScroll:true});}catch(e){first.focus();}}
+}
+function updateChip(){
+  $('#xpchip').textContent=S.xp+' XP'+(S.streak>=2?' · серия '+S.streak:'');
+}
+function say(kind,html){
+  const fb=$('#fb');fb.className='fb '+kind;fb.innerHTML=html;fb.hidden=false;
+}
+function num(id){
+  const el=document.getElementById(id);
+  if(!el||el.value.trim()==='')return null;
+  return parseInt(el.value,10);
+}
+function readAns(q){
+  if(q.mode==='dec'){
+    const t=document.getElementById('a-x').value.trim().replace(',','.');
+    if(!/^\d+(\.\d+)?$/.test(t))return {err:'Введи число, например 0,75.'};
+    return {x:parseFloat(t)};
+  }
+  if(q.mode==='frac'){
+    const n=num('a-n'),d=num('a-d');
+    if(n===null)return {err:'Впиши числитель.'};
+    if(d===null)return {v:[n,1]};
+    if(d===0)return {err:'Знаменатель не может быть нулём.'};
+    return {v:[n,d]};
+  }
+  const w=num('a-w'),n=num('a-n'),d=num('a-d');
+  if(w===null&&n===null)return {err:'Впиши ответ.'};
+  if(n!==null&&n>0&&(d===null||d===0))return {err:'Впиши знаменатель дробной части.'};
+  const ww=w||0,nn=n||0,dd=nn>0?d:1;
+  return {v:[ww*dd+nn,dd],n:nn,d:dd};
+}
+function isRight(q,r){
+  if(q.mode==='dec')return Math.abs(r.x-q.ans[0]/q.ans[1])<1e-9;
+  return r.v[0]*q.ans[1]===r.v[1]*q.ans[0];
+}
+function formNudge(q,r){
+  if(q.mode==='frac'){
+    if(r.v[1]>1&&gcd(r.v[0],r.v[1])>1)return 'Значение верное, но дробь можно сократить. Сократи её и проверь ещё раз.';
+    return null;
+  }
+  if(q.mode==='mixed'){
+    if(r.n>0&&r.n>=r.d)return 'Значение верное, но в дробной части числитель не меньше знаменателя. Выдели целую часть.';
+    if(r.n>0&&gcd(r.n,r.d)>1)return 'Значение верное, но дробную часть можно сократить.';
+  }
+  return null;
+}
+function lockInputs(cls){
+  const box=$('#ans');box.classList.add(cls);
+  box.querySelectorAll('input').forEach(i=>{i.disabled=true;});
+}
+function submit(){
+  if(!S)return;
+  if(S.done){next();return;}
+  const q=cur(),r=readAns(q);
+  if(r.err){say('warn',r.err);return;}
+  if(isRight(q,r)){
+    const nd=formNudge(q,r);
+    if(nd){say('warn',nd);return;}
+    win();
+  }else{
+    S.attempt++;
+    if(S.attempt===1){
+      say('bad','Не совсем. Проверь вычисления и попробуй ещё раз. Можно открыть подсказку.');
+      const box=$('#ans');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');
+      $('#btnHint').classList.add('pulse');
+      sfx('bad');
+      const f=box.querySelector('input');if(f){f.focus({preventScroll:true});f.select();}
+    }else lose();
+  }
+}
+function win(){
+  const first=S.attempt===0;
+  S.res[S.i]=first?'first':'second';
+  let gain=first?10:5;
+  if(S.hint)gain=Math.ceil(gain/2);
+  if(first)S.streak++;else S.streak=0;
+  const bonus=(first&&S.streak>=3)?5:0;
+  gain+=bonus;S.xp+=gain;S.done=true;
+  lockInputs('ok');sfx('ok');
+  say('good',PRAISE[ri(0,PRAISE.length-1)]+' +'+gain+' XP'+(bonus?' (бонус за серию)':''));
+  finishQ(false);
+}
+function lose(){
+  const q=cur();
+  S.res[S.i]='miss';S.streak=0;S.done=true;
+  lockInputs('no');sfx('bad');
+  say('bad','Правильный ответ: '+ansText(q)+'. Разбери решение и пойдём дальше.');
+  finishQ(true);
+}
+function stepsHTML(q){
+  return '<div class="hl">Как решать</div><ol>'+q.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>'+renderViz(q.viz);
+}
+function finishQ(showSteps){
+  const q=cur();
+  renderDots();updateChip();
+  $('#hintBox').hidden=true;
+  const sb=$('#stepsBox');sb.innerHTML=stepsHTML(q);
+  const bh=$('#btnHint');
+  if(showSteps){sb.hidden=false;S.stepsOpen=true;bh.hidden=true;}
+  else{sb.hidden=true;bh.hidden=false;bh.textContent='Показать решение';bh.classList.remove('pulse');}
+  const bc=$('#btnCheck');
+  bc.textContent=S.i===S.qs.length-1?'Закончить уровень':'Дальше';
+  bc.focus({preventScroll:true});
+}
+function next(){
+  if(S.i>=S.qs.length-1){finishLevel();return;}
+  S.i++;renderQ();
+}
+function onHint(){
+  if(!S)return;
+  const q=cur();
+  if(S.done){
+    S.stepsOpen=!S.stepsOpen;
+    $('#stepsBox').hidden=!S.stepsOpen;
+    $('#btnHint').textContent=S.stepsOpen?'Скрыть решение':'Показать решение';
+    return;
+  }
+  const hb=$('#hintBox');
+  if(!hb.hidden){hb.hidden=true;return;}
+  S.hint=true;
+  hb.innerHTML='<div class="hl">Подсказка</div><p>'+q.hint+'</p>'+renderViz(q.viz);
+  hb.hidden=false;
+  $('#btnHint').classList.remove('pulse');
+}
+
+/* ---------- итог уровня ---------- */
+function finishLevel(){
+  const first=S.res.filter(r=>r==='first').length,second=S.res.filter(r=>r==='second').length;
+  const score=first+second*0.5,st=score>=7?3:score>=5?2:score>=3?1:0;
+  const before=rankOf(save.xp);
+  save.xp+=S.xp;
+  const key=S.mi+'-'+S.li;
+  if(st>(save.stars[key]||0))save.stars[key]=st;
+  persist();
+  const after=rankOf(save.xp);
+  const m=S.mi,l=S.li;
+  let nb=null;
+  if(st>=1&&l<2)nb={t:'Следующий уровень',m:m,l:l+1};
+  else if(l===2&&st>=1&&m<MISSIONS.length-1)nb={t:'Следующий лагерь',m:m+1,l:0};
+  const summit=(m===MISSIONS.length-1&&l===2&&st>=1);
+  const title=summit?'Ты на вершине!':st>=3?'Блестяще!':st>=1?'Уровень пройден':'Почти получилось';
+  let h='<div class="rcard"><h2>'+title+'</h2><div class="bigstars">';
+  for(let k=0;k<3;k++)h+='<span style="animation-delay:'+(k*.25)+'s;display:inline-flex">'+starSvg(k<st)+'</span>';
+  h+='</div><p class="rsum">С первого раза верно: <b>'+first+'</b> из '+S.qs.length+'</p>';
+  h+='<p class="rxp">+'+S.xp+' XP</p>';
+  if(st===0)h+='<p class="note">Для первой звезды нужно набрать хотя бы 3 балла. Подсказки и разбор помогут: попробуй ещё раз.</p>';
+  if(st>0&&st<3)h+='<p class="note">Для трёх звёзд нужно решить почти всё с первого раза.</p>';
+  if(after>before)h+='<div class="rup">Новое звание: '+RANKS[after].name+'</div>';
+  h+='<div class="actions"><button class="btn ghost" id="rMap" type="button">К карте</button><button class="btn ghost" id="rAgain" type="button">Ещё раз</button>'+(nb?'<button class="btn gold" id="rNext" type="button">'+nb.t+'</button>':'')+'</div></div>';
+  $('#result').innerHTML=h;
+  show('result');
+  if(st>0)sfx('win');
+  if(st===3||summit||after>before)confetti();
+  $('#rMap').onclick=()=>show('home');
+  $('#rAgain').onclick=()=>start(m,l);
+  if(nb)$('#rNext').onclick=()=>start(nb.m,nb.l);
+  S=null;
+}
+
+/* ---------- события ---------- */
+$('#btnCheck').onclick=submit;
+$('#btnHint').onclick=onHint;
+$('#btnBack').onclick=()=>{S=null;show('home');};
+$('#home').addEventListener('click',e=>{
+  const lv=e.target.closest('.lv');
+  if(lv&&!lv.disabled){start(+lv.dataset.m,+lv.dataset.l);return;}
+  if(e.target.closest('#goOn')){const t=nextTarget();if(t)start(t.m,t.l);return;}
+  if(e.target.closest('#btnSet'))openSheet();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&S&&S.done&&!$('#play').hidden&&e.target.tagName!=='BUTTON'){e.preventDefault();next();}
+  if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet();
+});
+function openSheet(){
+  $('#optSound').checked=!!save.sound;$('#optOpen').checked=!!save.openAll;
+  $('#btnReset').textContent='Сбросить прогресс';$('#btnReset').classList.remove('danger');armed=false;
+  $('#sheet').hidden=false;
+}
+function closeSheet(){$('#sheet').hidden=true;renderHome();}
+let armed=false,armTimer=null;
+$('#optSound').onchange=e=>{save.sound=e.target.checked;persist();};
+$('#optOpen').onchange=e=>{save.openAll=e.target.checked;persist();};
+$('#btnClose').onclick=closeSheet;
+$('#sheet').addEventListener('click',e=>{if(e.target===$('#sheet'))closeSheet();});
+$('#btnReset').onclick=()=>{
+  const b=$('#btnReset');
+  if(!armed){armed=true;b.textContent='Нажми ещё раз: всё сотрётся';b.classList.add('danger');clearTimeout(armTimer);armTimer=setTimeout(()=>{armed=false;b.textContent='Сбросить прогресс';b.classList.remove('danger');},4000);}
+  else{save={xp:0,stars:{},sound:save.sound,openAll:false};persist();armed=false;b.textContent='Прогресс сброшен';b.classList.remove('danger');$('#optOpen').checked=false;}
+};
+
+show('home');
+})();
+</script>
+
+</body>
+</html>
